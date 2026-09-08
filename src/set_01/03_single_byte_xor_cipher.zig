@@ -1,26 +1,22 @@
 const std = @import("std");
-const stderr = std.debug;
+const Allocator = std.mem.Allocator;
+const Io = std.Io;
 const ascii = std.ascii;
 const assert = std.debug.assert;
 const cryto = std.crypto;
 const hex = cryto.codecs.hex;
-const Allocator = std.mem.Allocator;
-const Io = std.Io;
 
+const ChallengeContext = @import("cryptopalz").ChallengeContext;
 const stream = @import("cryptopalz").stream;
 
-pub fn main(init: std.process.Init) !void {
-    const allocator = init.arena.allocator();
-    const args = try init.minimal.args.toSlice(allocator);
-
-    const io = init.io;
-
-    var stdout_buffer: [1024]u8 = undefined;
-    var stdout_file_writer: Io.File.Writer = .init(.stdout(), io, &stdout_buffer);
-    const stdout = &stdout_file_writer.interface;
+pub fn challenge(context: ChallengeContext) !void {
+    const allocator = context.allocator;
+    const args = context.args;
+    const stdout = context.stdout;
+    const stderr = context.stderr;
 
     if (args.len != 2) {
-        stderr.print("Please provide a hex string as argument!\n", .{});
+        try stderr.print("Please provide a hex string as argument.\n", .{});
 
         return;
     }
@@ -30,7 +26,7 @@ pub fn main(init: std.process.Init) !void {
 
     const key_result = try stream.find_key(allocator, hex_input);
 
-    try stdout.print("{c}\n", .{key_result.key});
+    try stdout.print("0x{x:02}\n", .{key_result.key});
 
     try stdout.flush();
 }

@@ -1,24 +1,20 @@
 const std = @import("std");
-const stderr = std.debug;
+const Io = std.Io;
 const assert = std.debug.assert;
 const cryto = std.crypto;
 const hex = cryto.codecs.hex;
-const Io = std.Io;
 
+const ChallengeContext = @import("cryptopalz").ChallengeContext;
 const stream = @import("cryptopalz").stream;
 
-pub fn main(init: std.process.Init) !void {
-    const allocator = init.arena.allocator();
-    const args = try init.minimal.args.toSlice(allocator);
-
-    const io = init.io;
-
-    var stdout_buffer: [1024]u8 = undefined;
-    var stdout_file_writer: Io.File.Writer = .init(.stdout(), io, &stdout_buffer);
-    const stdout = &stdout_file_writer.interface;
+pub fn challenge(context: ChallengeContext) !void {
+    const allocator = context.allocator;
+    const args = context.args;
+    const stdout = context.stdout;
+    const stderr = context.stderr;
 
     if (args.len != 3) {
-        stderr.print("Please provide the plaintext and key as argument!\n", .{});
+        try stderr.print("Please provide plaintext and key as argument.\n", .{});
 
         return;
     }

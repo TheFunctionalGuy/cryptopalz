@@ -1,26 +1,23 @@
 const std = @import("std");
-const stderr = std.debug;
+const Allocator = std.mem.Allocator;
+const Io = std.Io;
 const assert = std.debug.assert;
 const crypto = std.crypto;
 const hex = crypto.codecs.hex;
-const Allocator = std.mem.Allocator;
-const Io = std.Io;
 
+const ChallengeContext = @import("cryptopalz").ChallengeContext;
 const stream = @import("cryptopalz").stream;
 const KeyResult = stream.KeyResult;
 
-pub fn main(init: std.process.Init) !void {
-    const allocator = init.arena.allocator();
-    const args = try init.minimal.args.toSlice(allocator);
-
-    const io = init.io;
-
-    var stdout_buffer: [1024]u8 = undefined;
-    var stdout_file_writer: Io.File.Writer = .init(.stdout(), io, &stdout_buffer);
-    const stdout = &stdout_file_writer.interface;
+pub fn challenge(context: ChallengeContext) !void {
+    const allocator = context.allocator;
+    const args = context.args;
+    const stdout = context.stdout;
+    const stderr = context.stderr;
+    const io = context.io;
 
     if (args.len != 2) {
-        stderr.print("Please provide a file as argument!\n", .{});
+        try stderr.print("Please provide a file containing hex-encoded ciphertexts as argument.\n", .{});
 
         return;
     }
@@ -44,7 +41,7 @@ pub fn main(init: std.process.Init) !void {
     }
 
     if (input.items.len == 0) {
-        stderr.print("The provided file is empty!\n", .{});
+        try stderr.print("The provided file is empty.\n", .{});
 
         return;
     }

@@ -1,23 +1,21 @@
 const std = @import("std");
-const stderr = std.debug;
 const aes = std.crypto.core.aes;
 const assert = std.debug.assert;
 const cryto = std.crypto;
 const base64 = cryto.codecs.base64;
 const Io = std.Io;
 
-pub fn main(init: std.process.Init) !void {
-    const allocator = init.arena.allocator();
-    const args = try init.minimal.args.toSlice(allocator);
+const ChallengeContext = @import("cryptopalz").ChallengeContext;
 
-    const io = init.io;
-
-    var stdout_buffer: [1024]u8 = undefined;
-    var stdout_file_writer: Io.File.Writer = .init(.stdout(), io, &stdout_buffer);
-    const stdout = &stdout_file_writer.interface;
+pub fn challenge(context: ChallengeContext) !void {
+    const allocator = context.allocator;
+    const args = context.args;
+    const stdout = context.stdout;
+    const stderr = context.stderr;
+    const io = context.io;
 
     if (args.len != 2) {
-        stderr.print("Please provide a file as argument!\n", .{});
+        try stderr.print("Please provide an AES-128-ECB encrypted file as argument.\n", .{});
 
         return;
     }

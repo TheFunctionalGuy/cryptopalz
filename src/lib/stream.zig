@@ -1,9 +1,9 @@
 const std = @import("std");
+const Allocator = std.mem.Allocator;
 const ascii = std.ascii;
 const assert = std.debug.assert;
 const cryto = std.crypto;
 const hex = cryto.codecs.hex;
-const Allocator = std.mem.Allocator;
 
 const LETTER_FREQUENCY = [_]f64{
     0.0651738,

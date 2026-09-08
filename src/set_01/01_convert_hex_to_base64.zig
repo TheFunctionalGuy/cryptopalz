@@ -1,25 +1,22 @@
 const std = @import("std");
-const stderr = std.debug;
+const Allocator = std.mem.Allocator;
+const Io = std.Io;
 const assert = std.debug.assert;
 const cryto = std.crypto;
 const hex = cryto.codecs.hex;
 const base64 = cryto.codecs.base64;
 const variant = base64.Variant.standard;
-const Allocator = std.mem.Allocator;
-const Io = std.Io;
 
-pub fn main(init: std.process.Init) !void {
-    const allocator = init.arena.allocator();
-    const args = try init.minimal.args.toSlice(allocator);
+const ChallengeContext = @import("cryptopalz").ChallengeContext;
 
-    const io = init.io;
-
-    var stdout_buffer: [1024]u8 = undefined;
-    var stdout_file_writer: Io.File.Writer = .init(.stdout(), io, &stdout_buffer);
-    const stdout = &stdout_file_writer.interface;
+pub fn challenge(context: ChallengeContext) !void {
+    const allocator = context.allocator;
+    const args = context.args;
+    const stdout = context.stdout;
+    const stderr = context.stderr;
 
     if (args.len != 2) {
-        stderr.print("Please provide a hex string as argument!\n", .{});
+        try stderr.print("Please provide a hex string as argument.\n", .{});
 
         return;
     }
