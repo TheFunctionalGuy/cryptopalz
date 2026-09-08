@@ -2,9 +2,8 @@ const std = @import("std");
 const assert = std.debug.assert;
 const cryto = std.crypto;
 const mem = std.mem;
-const base64 = cryto.codecs.base64;
 const Allocator = mem.Allocator;
-const Io = std.Io;
+const base64 = cryto.codecs.base64;
 
 const ChallengeContext = @import("cryptopalz").ChallengeContext;
 const stream = @import("cryptopalz").stream;
@@ -55,7 +54,7 @@ fn break_vignere(allocator: Allocator, ciphertext: []const u8) ![]const u8 {
 
     const decoded = try base64.decode(decoded_buffer, ciphertext, .standard);
 
-    const key_length = windowed_normalized_hamming_distance(decoded, 4);
+    const key_length = find_key_length(decoded, 2, 40);
 
     var decoded_padded = decoded;
 
@@ -109,28 +108,18 @@ fn break_vignere(allocator: Allocator, ciphertext: []const u8) ![]const u8 {
     return plaintext;
 }
 
-fn windowed_normalized_hamming_distance(
+fn find_key_length(
     input: []const u8,
-    comptime window_size: usize,
+    min_key_size: usize,
+    max_key_size: usize,
 ) usize {
+    assert(min_key_size < max_key_size);
+
     var best_keysize: usize = 0;
     var best_distance: f64 = std.math.floatMax(f64);
 
-    for (2..41) |keysize| {
-        var distance: f64 = 0;
-
-        // Compare every pair of blocks in the window.
-        inline for (0..window_size) |i| {
-            const first = input[i * keysize .. (i + 1) * keysize];
-
-            inline for (i + 1..window_size) |j| {
-                const second = input[j * keysize .. (j + 1) * keysize];
-
-                distance += @as(f64, @floatFromInt(
-                    util.hamming_distance(first, second),
-                )) / @as(f64, @floatFromInt(keysize));
-            }
-        }
+    for (min_key_size..max_key_size + 1) |keysize| {
+        const distance: f64 = util.windowed_normalized_hamming_distance(4, input, keysize);
 
         if (distance < best_distance) {
             best_distance = distance;

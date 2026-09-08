@@ -1,6 +1,5 @@
 const std = @import("std");
 const Allocator = std.mem.Allocator;
-const Io = std.Io;
 const assert = std.debug.assert;
 const crypto = std.crypto;
 const hex = crypto.codecs.hex;
@@ -34,7 +33,7 @@ pub fn challenge(context: ChallengeContext) !void {
     var input: std.ArrayList([]const u8) = .empty;
     defer input.deinit(allocator);
 
-    var it = std.mem.splitScalar(u8, input_file, '\n');
+    var it = std.mem.tokenizeScalar(u8, input_file, '\n');
 
     while (it.next()) |line| {
         try input.append(allocator, line);

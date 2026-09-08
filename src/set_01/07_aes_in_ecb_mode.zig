@@ -3,7 +3,6 @@ const aes = std.crypto.core.aes;
 const assert = std.debug.assert;
 const cryto = std.crypto;
 const base64 = cryto.codecs.base64;
-const Io = std.Io;
 
 const ChallengeContext = @import("cryptopalz").ChallengeContext;
 
