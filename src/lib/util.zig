@@ -1,4 +1,5 @@
 const std = @import("std");
+const Allocator = std.mem.Allocator;
 const assert = std.debug.assert;
 
 pub fn hamming_distance(first: []const u8, second: []const u8) usize {
@@ -12,6 +13,16 @@ pub fn hamming_distance(first: []const u8, second: []const u8) usize {
     }
 
     return distance;
+}
+
+test "Hamming distance" {
+    const first_text = "this is a test";
+    const second_text = "wokka wokka!!!";
+    const expected_distance = 37;
+
+    const distance = hamming_distance(first_text, second_text);
+
+    try std.testing.expectEqual(expected_distance, distance);
 }
 
 pub fn windowed_normalized_hamming_distance(
@@ -37,12 +48,37 @@ pub fn windowed_normalized_hamming_distance(
     return distance;
 }
 
-test "Hamming distance" {
-    const first_text = "this is a test";
-    const second_text = "wokka wokka!!!";
-    const expected_distance = 37;
+pub fn pkcs7(allocator: Allocator, input: []const u8, block_size: usize) ![]u8 {
+    const padding_length: u8 = @intCast(block_size - (input.len % block_size));
 
-    const distance = hamming_distance(first_text, second_text);
+    const padding = try allocator.alloc(u8, padding_length);
+    defer allocator.free(padding);
 
-    try std.testing.expectEqual(expected_distance, distance);
+    @memset(padding, padding_length);
+
+    return try std.mem.concat(allocator, u8, &.{ input, padding });
+}
+
+test "Full block" {
+    const allocator = std.testing.allocator;
+
+    const input = "YELLOW SUBMARINE";
+    const expected_output = "YELLOW SUBMARINE\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10";
+
+    const padded_input = try pkcs7(allocator, input, 16);
+    defer allocator.free(padded_input);
+
+    try std.testing.expectEqualStrings(expected_output, padded_input);
+}
+
+test "One missing" {
+    const allocator = std.testing.allocator;
+
+    const input = "YELLOW SUBMARIN";
+    const expected_output = "YELLOW SUBMARIN\x01";
+
+    const padded_input = try pkcs7(allocator, input, 16);
+    defer allocator.free(padded_input);
+
+    try std.testing.expectEqualStrings(expected_output, padded_input);
 }

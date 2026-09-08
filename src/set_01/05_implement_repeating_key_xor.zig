@@ -22,12 +22,8 @@ pub fn challenge(context: ChallengeContext) !void {
     const ciphertext = try stream.repeating(allocator, args[1], args[2]);
     defer allocator.free(ciphertext);
 
-    const encoded = try allocator.alloc(u8, ciphertext.len * 2);
-    defer allocator.free(encoded);
-
-    try hex.encode(encoded, ciphertext, .lower);
-
-    try stdout.print("{s}\n", .{encoded});
+    try stdout.printHex(ciphertext, .lower);
+    try stdout.print("\n", .{});
 
     try stdout.flush();
 }

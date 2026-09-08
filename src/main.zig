@@ -14,6 +14,7 @@ const challenge_05 = @import("set_01/05_implement_repeating_key_xor.zig");
 const challenge_06 = @import("set_01/06_break_repeating_key_xor.zig");
 const challenge_07 = @import("set_01/07_aes_in_ecb_mode.zig");
 const challenge_08 = @import("set_01/08_detect_aes_in_cbc_mode.zig");
+const challenge_09 = @import("set_02/09_implement_pkcs7_padding.zig");
 
 pub fn main(init: std.process.Init) !void {
     const allocator = init.arena.allocator();
@@ -87,6 +88,11 @@ pub fn main(init: std.process.Init) !void {
     if (eql(u8, args[1], "8") or eql(u8, args[1], "08")) {
         return challenge_08.challenge(context);
     }
+    // Implement PKCS#7 padding:
+    // https://cryptopals.com/sets/2/challenges/9
+    if (eql(u8, args[1], "9") or eql(u8, args[1], "09")) {
+        return challenge_09.challenge(context);
+    }
 
     try stderr.print("Please provide valid challenge number.\n", .{});
 }
@@ -100,4 +106,5 @@ test "Challanges" {
     refAllDecls(challenge_06);
     refAllDecls(challenge_07);
     refAllDecls(challenge_08);
+    refAllDecls(challenge_09);
 }
