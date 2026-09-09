@@ -2,8 +2,8 @@ const std = @import("std");
 const Allocator = std.mem.Allocator;
 const ascii = std.ascii;
 const assert = std.debug.assert;
-const cryto = std.crypto;
-const hex = cryto.codecs.hex;
+const crypto = std.crypto;
+const hex = crypto.codecs.hex;
 
 const LETTER_FREQUENCY = [_]f64{
     0.0651738,
@@ -40,7 +40,10 @@ pub const KeyResult = struct {
     score: f64,
 };
 
-pub fn find_key(allocator: Allocator, encoded_ciphertext: []const u8) !KeyResult {
+pub fn find_key(
+    allocator: Allocator,
+    encoded_ciphertext: []const u8,
+) !KeyResult {
     assert(encoded_ciphertext.len % 2 == 0);
 
     const ciphertext = try allocator.alloc(u8, encoded_ciphertext.len / 2);
@@ -51,7 +54,10 @@ pub fn find_key(allocator: Allocator, encoded_ciphertext: []const u8) !KeyResult
     return find_key_decoded(allocator, ciphertext);
 }
 
-pub fn find_key_decoded(allocator: Allocator, ciphertext: []const u8) !KeyResult {
+pub fn find_key_decoded(
+    allocator: Allocator,
+    ciphertext: []const u8,
+) !KeyResult {
     var best_score = std.math.floatMax(f64);
     var best_key: u8 = undefined;
 
@@ -70,7 +76,11 @@ pub fn find_key_decoded(allocator: Allocator, ciphertext: []const u8) !KeyResult
     };
 }
 
-fn score(allocator: Allocator, ciphertext: []const u8, key: u8) !f64 {
+fn score(
+    allocator: Allocator,
+    ciphertext: []const u8,
+    key: u8,
+) !f64 {
     var result: f64 = 0.0;
     var letter_count: f64 = 0.0;
     var frequencies: [LETTER_FREQUENCY.len]f64 = undefined;
@@ -105,7 +115,11 @@ fn score(allocator: Allocator, ciphertext: []const u8, key: u8) !f64 {
     return result;
 }
 
-pub fn single(allocator: Allocator, plaintext: []const u8, key: u8) ![]u8 {
+pub fn single(
+    allocator: Allocator,
+    plaintext: []const u8,
+    key: u8,
+) ![]u8 {
     const ciphertext = try allocator.alloc(u8, plaintext.len);
 
     for (0..plaintext.len) |i| {
@@ -115,7 +129,11 @@ pub fn single(allocator: Allocator, plaintext: []const u8, key: u8) ![]u8 {
     return ciphertext;
 }
 
-pub fn repeating(allocator: Allocator, plaintext: []const u8, key: []const u8) ![]u8 {
+pub fn repeating(
+    allocator: Allocator,
+    plaintext: []const u8,
+    key: []const u8,
+) ![]u8 {
     const ciphertext = try allocator.alloc(u8, plaintext.len);
 
     for (0..plaintext.len) |i| {

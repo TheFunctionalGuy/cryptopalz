@@ -5,6 +5,7 @@ const Io = std.Io;
 const Writer = std.Io.Writer;
 const refAllDecls = std.testing.refAllDecls;
 
+pub const block = @import("lib/block.zig");
 pub const stream = @import("lib/stream.zig");
 pub const util = @import("lib/util.zig");
 
@@ -17,6 +18,7 @@ pub const ChallengeContext = struct {
 };
 
 test "Libraries" {
+    refAllDecls(block);
     refAllDecls(stream);
     refAllDecls(util);
 }

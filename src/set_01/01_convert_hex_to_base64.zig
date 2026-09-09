@@ -1,9 +1,9 @@
 const std = @import("std");
 const Allocator = std.mem.Allocator;
 const assert = std.debug.assert;
-const cryto = std.crypto;
-const hex = cryto.codecs.hex;
-const base64 = cryto.codecs.base64;
+const crypto = std.crypto;
+const hex = crypto.codecs.hex;
+const base64 = crypto.codecs.base64;
 const variant = base64.Variant.standard;
 
 const ChallengeContext = @import("cryptopalz").ChallengeContext;
@@ -31,7 +31,10 @@ pub fn challenge(context: ChallengeContext) !void {
     try stdout.flush();
 }
 
-fn hex_to_base64(allocator: Allocator, hex_input: []const u8) ![]const u8 {
+fn hex_to_base64(
+    allocator: Allocator,
+    hex_input: []const u8,
+) ![]const u8 {
     assert(hex_input.len % 2 == 0);
 
     const unhexed = try allocator.alloc(u8, hex_input.len / 2);

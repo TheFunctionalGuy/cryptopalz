@@ -2,7 +2,10 @@ const std = @import("std");
 const Allocator = std.mem.Allocator;
 const assert = std.debug.assert;
 
-pub fn hamming_distance(first: []const u8, second: []const u8) usize {
+pub fn hamming_distance(
+    first: []const u8,
+    second: []const u8,
+) usize {
     assert(first.len == second.len);
 
     var distance: usize = 0;
@@ -48,7 +51,11 @@ pub fn windowed_normalized_hamming_distance(
     return distance;
 }
 
-pub fn pkcs7(allocator: Allocator, input: []const u8, block_size: usize) ![]u8 {
+pub fn pkcs7(
+    allocator: Allocator,
+    input: []const u8,
+    block_size: usize,
+) ![]u8 {
     const padding_length: u8 = @intCast(block_size - (input.len % block_size));
 
     const padding = try allocator.alloc(u8, padding_length);
@@ -59,7 +66,19 @@ pub fn pkcs7(allocator: Allocator, input: []const u8, block_size: usize) ![]u8 {
     return try std.mem.concat(allocator, u8, &.{ input, padding });
 }
 
-test "Full block" {
+pub fn remove_pkcs7(
+    allocator: Allocator,
+    input: []const u8,
+) ![]u8 {
+    const padding_length: u8 = input[input.len - 1];
+
+    const unpadded = try allocator.alloc(u8, input.len - padding_length);
+    @memcpy(unpadded, input[0..unpadded.len]);
+
+    return unpadded;
+}
+
+test "PKCS#7 - Full block" {
     const allocator = std.testing.allocator;
 
     const input = "YELLOW SUBMARINE";
@@ -71,7 +90,7 @@ test "Full block" {
     try std.testing.expectEqualStrings(expected_output, padded_input);
 }
 
-test "One missing" {
+test "PKCS#7 - One missing" {
     const allocator = std.testing.allocator;
 
     const input = "YELLOW SUBMARIN";
@@ -81,4 +100,18 @@ test "One missing" {
     defer allocator.free(padded_input);
 
     try std.testing.expectEqualStrings(expected_output, padded_input);
+}
+
+test "PKCS#7 - Inverse" {
+    const allocator = std.testing.allocator;
+
+    const input = "YELLOW SUBMARINE";
+
+    const padded_input = try pkcs7(allocator, input, 16);
+    defer allocator.free(padded_input);
+
+    const depadded_input = try remove_pkcs7(allocator, padded_input);
+    defer allocator.free(depadded_input);
+
+    try std.testing.expectEqualStrings(input, depadded_input);
 }

@@ -1,8 +1,8 @@
 const std = @import("std");
 const aes = std.crypto.core.aes;
 const assert = std.debug.assert;
-const cryto = std.crypto;
-const base64 = cryto.codecs.base64;
+const crypto = std.crypto;
+const base64 = crypto.codecs.base64;
 
 const ChallengeContext = @import("cryptopalz").ChallengeContext;
 
@@ -53,8 +53,8 @@ pub fn challenge(context: ChallengeContext) !void {
 
     var start: usize = 0;
     while (start < decoded.len) : (start += 16) {
-        const src: *const [16]u8 = @ptrCast(decoded[start .. start + 16]);
-        const dst: *[16]u8 = @ptrCast(plaintext[start .. start + 16]);
+        const src = decoded[start..][0..16];
+        const dst = plaintext[start..][0..16];
 
         aes_128.decrypt(dst, src);
     }

@@ -1,9 +1,9 @@
 const std = @import("std");
 const assert = std.debug.assert;
-const cryto = std.crypto;
+const crypto = std.crypto;
 const mem = std.mem;
 const Allocator = mem.Allocator;
-const base64 = cryto.codecs.base64;
+const base64 = crypto.codecs.base64;
 
 const ChallengeContext = @import("cryptopalz").ChallengeContext;
 const stream = @import("cryptopalz").stream;
@@ -48,7 +48,10 @@ pub fn challenge(context: ChallengeContext) !void {
     try stdout.flush();
 }
 
-fn break_vignere(allocator: Allocator, ciphertext: []const u8) ![]const u8 {
+fn break_vignere(
+    allocator: Allocator,
+    ciphertext: []const u8,
+) ![]const u8 {
     const decoded_buffer = try allocator.alloc(u8, try base64.decodedLen(ciphertext.len, .standard));
     defer allocator.free(decoded_buffer);
 

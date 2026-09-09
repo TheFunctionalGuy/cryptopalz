@@ -50,7 +50,10 @@ pub fn challenge(context: ChallengeContext) !void {
     try stdout.flush();
 }
 
-fn aes_ecb_oracle(allocator: Allocator, encoded_ciphertexts: []const []const u8) !usize {
+fn aes_ecb_oracle(
+    allocator: Allocator,
+    encoded_ciphertexts: []const []const u8,
+) !usize {
     var best_ciphertext_index: usize = 0;
     var most_duplicates: usize = 0;
 

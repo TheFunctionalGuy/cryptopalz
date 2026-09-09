@@ -1,7 +1,7 @@
 const std = @import("std");
 const assert = std.debug.assert;
-const cryto = std.crypto;
-const hex = cryto.codecs.hex;
+const crypto = std.crypto;
+const hex = crypto.codecs.hex;
 
 const ChallengeContext = @import("cryptopalz").ChallengeContext;
 const stream = @import("cryptopalz").stream;

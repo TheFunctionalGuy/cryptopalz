@@ -1,8 +1,8 @@
 const std = @import("std");
 const Allocator = std.mem.Allocator;
 const assert = std.debug.assert;
-const cryto = std.crypto;
-const hex = cryto.codecs.hex;
+const crypto = std.crypto;
+const hex = crypto.codecs.hex;
 
 const ChallengeContext = @import("cryptopalz").ChallengeContext;
 
@@ -27,9 +27,11 @@ pub fn challenge(context: ChallengeContext) !void {
     try stdout.flush();
 }
 
-// TODO: This can also be converted to comptime version using length of input as input.
-// Then all the allocator shenanigans are not required anymore.
-fn fixed_xor(allocator: Allocator, first: []const u8, second: []const u8) ![]u8 {
+fn fixed_xor(
+    allocator: Allocator,
+    first: []const u8,
+    second: []const u8,
+) ![]u8 {
     assert(first.len == second.len);
     assert(first.len % 2 == 0);
 
