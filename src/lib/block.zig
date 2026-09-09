@@ -4,12 +4,17 @@ const aes = std.crypto.core.aes;
 
 const util = @import("util.zig");
 
+pub const ModeOfOperation = enum {
+    ECB,
+    CBC,
+};
+
 pub fn aes_cbc_encrypt(
     allocator: Allocator,
     iv: *const [16]u8,
     plaintext: []const u8,
     key: *const [16]u8,
-) ![]const u8 {
+) ![]u8 {
     const padded_plaintext = try util.pkcs7(allocator, plaintext, 16);
     defer allocator.free(padded_plaintext);
 
@@ -41,7 +46,7 @@ pub fn aes_cbc_decrypt(
     iv: *const [16]u8,
     ciphertext: []const u8,
     key: *const [16]u8,
-) ![]const u8 {
+) ![]u8 {
     const padded_plaintext = try allocator.alloc(u8, ciphertext.len);
     defer allocator.free(padded_plaintext);
 
@@ -76,6 +81,61 @@ test "AES-CBC" {
     defer allocator.free(ciphertext);
 
     const plaintext = try aes_cbc_decrypt(allocator, &iv, ciphertext, key);
+    defer allocator.free(plaintext);
+
+    try std.testing.expectEqualStrings(input, plaintext);
+}
+
+// TODO: Use comptime code to reduce code duplication
+pub fn aes_ecb_encrypt(
+    allocator: Allocator,
+    plaintext: []const u8,
+    key: *const [16]u8,
+) ![]u8 {
+    const padded_plaintext = try util.pkcs7(allocator, plaintext, 16);
+    defer allocator.free(padded_plaintext);
+
+    const ciphertext = try allocator.alloc(u8, padded_plaintext.len);
+
+    const aes_128 = aes.Aes128.initEnc(key.*);
+
+    var i: usize = 0;
+    while (i < padded_plaintext.len) : (i += 16) {
+        aes_128.encrypt(ciphertext[i..][0..16], padded_plaintext[i..][0..16]);
+    }
+
+    return ciphertext;
+}
+
+// TODO: Use comptime code to reduce code duplication
+pub fn aes_ecb_decrypt(
+    allocator: Allocator,
+    ciphertext: []const u8,
+    key: *const [16]u8,
+) ![]u8 {
+    const padded_plaintext = try allocator.alloc(u8, ciphertext.len);
+    defer allocator.free(padded_plaintext);
+
+    const aes_128 = aes.Aes128.initDec(key.*);
+
+    var i: usize = 0;
+    while (i < ciphertext.len) : (i += 16) {
+        aes_128.decrypt(padded_plaintext[i..][0..16], ciphertext[i..][0..16]);
+    }
+
+    return try util.remove_pkcs7(allocator, padded_plaintext);
+}
+
+test "AES-ECB" {
+    const allocator = std.testing.allocator;
+
+    const input = "This is a test input";
+    const key = "YELLOW SUBMARINE";
+
+    const ciphertext = try aes_ecb_encrypt(allocator, input, key);
+    defer allocator.free(ciphertext);
+
+    const plaintext = try aes_ecb_decrypt(allocator, ciphertext, key);
     defer allocator.free(plaintext);
 
     try std.testing.expectEqualStrings(input, plaintext);

@@ -16,6 +16,7 @@ const challenge_07 = @import("set_01/07_aes_in_ecb_mode.zig");
 const challenge_08 = @import("set_01/08_detect_aes_in_cbc_mode.zig");
 const challenge_09 = @import("set_02/09_implement_pkcs7_padding.zig");
 const challenge_10 = @import("set_02/10_implement_cbc_mode.zig");
+const challenge_11 = @import("set_02/11_an_ebc_cbc_detection_oracle.zig");
 
 pub fn main(init: std.process.Init) !void {
     const allocator = init.arena.allocator();
@@ -99,6 +100,11 @@ pub fn main(init: std.process.Init) !void {
     if (eql(u8, args[1], "10")) {
         return challenge_10.challenge(context);
     }
+    // An ECB/CBC detection oracle:
+    // https://cryptopals.com/sets/2/challenges/11
+    if (eql(u8, args[1], "11")) {
+        return challenge_11.challenge(context);
+    }
 
     try stderr.print("Please provide valid challenge number.\n", .{});
 }
@@ -114,4 +120,5 @@ test "Challanges" {
     refAllDecls(challenge_08);
     refAllDecls(challenge_09);
     refAllDecls(challenge_10);
+    refAllDecls(challenge_11);
 }
